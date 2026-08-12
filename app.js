@@ -2,8 +2,9 @@ import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
-    getMessaging,
-    getToken
+    getFirestore,
+    collection,
+    addDoc
 } from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
 
@@ -25,6 +26,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const messaging = getMessaging(app);
+
+const db = getFirestore(app);
 
 
 // Elementos
@@ -60,8 +63,14 @@ botao.addEventListener("click", async () => {
             "Permissão concedida! 🔔";
 
 
-        // Aqui vamos obter o token FCM
-        // no próximo passo.
+// Salvar cadastro no Firestore
+await addDoc(collection(db, "usuarios"), {
+    nome: "Usuário",
+    dataCadastro: new Date().toISOString()
+});
+
+status.textContent =
+    "Cadastro concluído! ✅";
 
     } catch (erro) {
 
