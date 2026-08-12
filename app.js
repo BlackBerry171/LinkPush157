@@ -8,6 +8,7 @@ import {
 } from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
 
+document.getElementById("status").textContent = "JavaScript carregado! ✅";
 
 // 🔥 CONFIGURAÇÃO DO SEU FIREBASE
 
@@ -72,9 +73,3 @@ await addDoc(collection(db, "usuarios"), {
     dataCadastro: new Date().toISOString()
 });
 
-status.textContent =
-    "Cadastro concluído! ✅";
-
-    } catch (erro) {
-
- 
