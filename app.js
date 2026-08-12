@@ -39,6 +39,9 @@ const status = document.getElementById("status");
 // Quando o usuário clicar em OK
 
 botao.addEventListener("click", async () => {
+    
+    console.log("BOTÃO ACESSAR FOI CLICADO!");
+status.textContent = "Botão funcionando! ⚡";
 
     try {
 
@@ -74,11 +77,4 @@ status.textContent =
 
     } catch (erro) {
 
-        console.error(erro);
-
-        status.textContent =
-            "Ocorreu um erro.";
-
-    }
-
-});
+ 
