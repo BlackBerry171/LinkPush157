@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>LinkPush — Painel</title>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      padding: 25px 18px;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+    }
+    
+    .topo {
+      margin-bottom: 25px;
+    }
+    
+    .topo h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+    
+    .topo p {
+      color: #aaa;
+      margin-top: 8px;
+    }
+    
+    .card {
+      background: #1c1c1c;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    
+    .numero {
+      font-size: 36px;
+      font-weight: bold;
+      color: #ffd000;
+    }
+    
+    .titulo {
+      font-size: 17px;
+      color: #ccc;
+    }
+    
+    #usuarios {
+      margin-top: 15px;
+    }
+    
+    .usuario {
+      background: #292929;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+    
+    .usuario strong {
+      font-size: 16px;
+    }
+    
+    .usuario small {
+      display: block;
+      margin-top: 5px;
+      color: #999;
+    }
+    
+    #status {
+      color: #aaa;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="topo">
+    <h1>📊 LinkPush</h1>
+    <p>Painel de controle</p>
+  </div>
+  
+  <div class="card">
+    <div class="titulo">👥 Usuários cadastrados</div>
+    
+    <div class="numero" id="total">
+      0
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="titulo">Lista de usuários</div>
+    
+    <div id="usuarios">
+      Carregando...
+    </div>
+  </div>
+  
+  <div id="status"></div>
+  
+  <script type="module">
+    import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    
+    import {
+      getFirestore,
+      collection,
+      onSnapshot
+    }
+    from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    
+    
+    // 🔥 COLOQUE AQUI O MESMO firebaseConfig
+    // QUE VOCÊ JÁ USA NO app.js
+    
+    const firebaseConfig = {
+  apiKey: "AIzaSyBxt1S0Rn63tymkSa0CqqpQBi8fFgSKhoE",
+  authDomain: "linkpush-e7bb6.firebaseapp.com",
+  projectId: "linkpush-e7bb6",
+  storageBucket: "linkpush-e7bb6.firebasestorage.app",
+  messagingSenderId: "753138864517",
+  appId: "1:753138864517:web:3df918ac7b3a861bdff4ec"
+};
+    
+    
+    const app = initializeApp(firebaseConfig);
+    
+    const db = getFirestore(app);
+    
+    
+    function carregarUsuarios() {
+  
+  const lista = document.getElementById("usuarios");
+  const total = document.getElementById("total");
+  const status = document.getElementById("status");
+  
+  onSnapshot(
+    collection(db, "usuarios"),
+    (consulta) => {
+      
+      total.textContent = consulta.size;
+      
+      lista.innerHTML = "";
+      
+      if (consulta.empty) {
+        
+        lista.innerHTML =
+          "<p>Nenhum usuário cadastrado.</p>";
+        
+        status.textContent =
+          "Firebase conectado ✅";
+        
+        return;
+      }
+      
+      let numero = 1;
+      
+      consulta.forEach((documento) => {
+        
+        const dados = documento.data();
+        
+        const nome =
+          dados.nome || "Usuário";
+        
+        const div =
+          document.createElement("div");
+        
+        div.className = "usuario";
+        
+        div.innerHTML = `
+                    <strong>
+                        ${String(numero).padStart(3, "0")} — ${nome}
+                    </strong>
+
+                    <small>
+                        ID: ${documento.id}
+                    </small>
+                `;
+        
+        lista.appendChild(div);
+        
+        numero++;
+      });
+      
+      status.textContent =
+        "Firebase conectado ✅";
+      
+    },
+    (erro) => {
+      
+      console.error(erro);
+      
+      status.textContent =
+        "Erro ao carregar usuários ❌";
+      
+      lista.innerHTML =
+        "<p>Não foi possível carregar os usuários.</p>";
+    }
+  );
+}
+      
+      const lista = document.getElementById("usuarios");
+      const total = document.getElementById("total");
+      const status = document.getElementById("status");
+      
+      try {
+        
+        const consulta =
+          await getDocs(collection(db, "usuarios"));
+        
+        total.textContent = consulta.size;
+        
+        lista.innerHTML = "";
+        
+        if (consulta.empty) {
+          
+          lista.innerHTML =
+            "<p>Nenhum usuário cadastrado.</p>";
+          
+          return;
+        }
+        
+        
+        let numero = 1;
+        
+        
+        consulta.forEach((documento) => {
+          
+          const dados = documento.data();
+          
+          const nome =
+            dados.nome || "Usuário";
+          
+          
+          const div =
+            document.createElement("div");
+          
+          div.className = "usuario";
+          
+          
+          div.innerHTML = `
+                        <strong>
+                            ${String(numero).padStart(3, "0")} — ${nome}
+                        </strong>
+
+                        <small>
+                            ID: ${documento.id}
+                        </small>
+                    `;
+          
+          
+          lista.appendChild(div);
+          
+          numero++;
+          
+        });
+        
+        
+        status.textContent =
+          "Firebase conectado ✅";
+        
+        
+      } catch (erro) {
+        
+        console.error(erro);
+        
+        status.textContent =
+          "Erro ao carregar usuários ❌";
+        
+        lista.innerHTML =
+          "<p>Não foi possível carregar os usuários.</p>";
+        
+      }
+      
+    }
+    
+    
+    carregarUsuarios();
+  </script>
+  
+</body>
+
+</html>
