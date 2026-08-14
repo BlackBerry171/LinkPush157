@@ -107,6 +107,10 @@
   <div id="status"></div>
   
   <script type="module">
+  
+  document.getElementById("status").textContent =
+  "JavaScript do painel carregou! ⚡";
+  
     import { initializeApp }
     from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     
@@ -279,15 +283,3 @@
         
         lista.innerHTML =
           "<p>Não foi possível carregar os usuários.</p>";
-        
-      }
-      
-    }
-    
-    
-    carregarUsuarios();
-  </script>
-  
-</body>
-
-</html>
