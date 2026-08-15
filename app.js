@@ -79,6 +79,8 @@ botao.addEventListener(
             const permissao =
                 await Notification.requestPermission();
 
+            status.textContent =
+    "PERMISSÃO: " + Notification.permission;
 
             if (permissao !== "granted") {
 
