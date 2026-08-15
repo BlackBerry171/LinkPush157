@@ -18,3 +18,60 @@ firebase.initializeApp({
 
 
 const messaging = firebase.messaging();
+
+
+messaging.onBackgroundMessage((payload) => {
+
+  console.log(
+    "Notificação recebida em segundo plano:",
+    payload
+  );
+
+
+  const notificationTitle =
+    payload.notification?.title ||
+    "LinkPush 🔔";
+
+
+  const notificationOptions = {
+
+    body:
+      payload.notification?.body ||
+      "Você recebeu uma nova mensagem.",
+
+    icon:
+      payload.notification?.icon ||
+      "/LinkPush157/icon.png",
+
+    data: {
+      url:
+        payload.data?.url ||
+        "https://blackberry171.github.io/LinkPush157/"
+    }
+
+  };
+
+
+  self.registration.showNotification(
+    notificationTitle,
+    notificationOptions
+  );
+
+});
+
+
+self.addEventListener("notificationclick", (event) => {
+
+  event.notification.close();
+
+
+  const url =
+    event.notification.data?.url ||
+    "https://blackberry171.github.io/LinkPush157/";
+
+
+  event.waitUntil(
+    clients.openWindow(url)
+  );
+
+});
