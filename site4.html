@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Vazados</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+
+      font-family: Arial, sans-serif;
+
+      background:
+        linear-gradient(
+          rgba(0, 0, 0, 0.65),
+          rgba(0, 0, 0, 0.75)
+        ),
+        url("Vazados.png");
+
+      background-size: cover;
+      background-position: center;
+
+      color: white;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+
+      padding: 35px 25px;
+
+      text-align: center;
+
+      background: rgba(20, 20, 20, 0.82);
+
+      border-radius: 22px;
+
+      backdrop-filter: blur(8px);
+
+      box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .icone {
+      font-size: 55px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+
+      font-size: 30px;
+    }
+
+    p {
+      margin-top: 12px;
+
+      color: #ccc;
+
+      line-height: 1.5;
+    }
+
+    button {
+      width: 100%;
+
+      margin-top: 25px;
+
+      padding: 15px;
+
+      border: none;
+
+      border-radius: 12px;
+
+      background: #ffffff;
+
+      color: #111;
+
+      font-size: 16px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #status {
+      margin-top: 15px;
+
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="icone">
+      📸
+    </div>
+
+    <h1>
+      Vazados
+    </h1>
+
+    <p>
+      Conteúdos e informações
+      que despertam curiosidade.
+    </p>
+
+    <button id="participar">
+      ACESSAR
+    </button>
+
+    <div id="status"></div>
+
+  </div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+
+</html>
