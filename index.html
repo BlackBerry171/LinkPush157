@@ -11,84 +11,53 @@
             box-sizing: border-box;
         }
 
-        html,
         body {
             margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
+            min-height: 100vh;
 
-        /* FUNDO */
-        body {
-            position: relative;
             display: flex;
-            align-items: center;
             justify-content: center;
-            background: transparent;
-        }
+            align-items: center;
 
-        /* Imagem política desfocada */
-        body::before {
-            content: "";
-            position: fixed;
-            inset: -25px;
+            font-family: Arial, sans-serif;
 
-            background-image: url("./politica.png");
+            background-image:
+                linear-gradient(
+                    rgba(0,0,0,0.45),
+                    rgba(0,0,0,0.45)
+                ),
+                url("Política.png");
+
             background-size: cover;
             background-position: center;
-
-            filter: blur(7px);
-            transform: scale(1.08);
-
-            z-index: 0;
+            background-repeat: no-repeat;
         }
 
-        /* Camada escura para melhorar a leitura */
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-
-            background: rgba(0, 0, 0, 0.35);
-
-            z-index: 1;
-        }
-
-        /* CARTÃO CENTRAL */
         .card {
-            position: relative;
-            z-index: 2;
-            
-            width: 86%;
-            max-width: 390px;
+            width: 90%;
+            max-width: 400px;
 
-            padding: 32px 25px;
-
-            background: rgba(255, 255, 255, 0.95);
-
-            border-radius: 22px;
+            padding: 35px 25px;
 
             text-align: center;
 
-            box-shadow:
-                0 15px 40px rgba(0, 0, 0, 0.35);
+            background: rgba(255,255,255,0.92);
 
-            animation: aparecer 0.5s ease;
+            border-radius: 20px;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .titulo {
-            margin: 0 0 14px;
+        h1 {
+            margin: 0 0 15px;
 
             font-size: 28px;
-            font-weight: 800;
-
             color: #222;
         }
 
         .descricao {
-            margin: 0 0 28px;
+            margin: 0 0 30px;
 
             font-size: 16px;
             line-height: 1.5;
@@ -96,8 +65,7 @@
             color: #555;
         }
 
-        /* BOTÃO */
-        #participar {
+        #acessar {
             width: 100%;
 
             padding: 16px;
@@ -105,41 +73,17 @@
             border: none;
             border-radius: 12px;
 
-            background: #168a45;
+            background: #70c98b;
             color: white;
 
             font-size: 17px;
             font-weight: bold;
 
             cursor: pointer;
-
-            box-shadow:
-                0 6px 15px rgba(0, 0, 0, 0.20);
-
-            transition: 0.2s;
         }
 
-        #participar:active {
-            transform: scale(0.97);
-        }
-
-        #status {
-            margin-top: 18px;
-
-            font-size: 14px;
-            color: #555;
-        }
-
-        @keyframes aparecer {
-            from {
-                opacity: 0;
-                transform: scale(0.94);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        #acessar:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -148,24 +92,19 @@
 
     <div class="card">
 
-        <h1 class="titulo">
-            🇧🇷 Central Política
-        </h1>
+        <h1>🇧🇷 Central Política</h1>
 
         <p class="descricao">
             Informação, acontecimentos e bastidores.
         </p>
 
-        <button id="participar">
+        <button id="acessar">
             ACESSAR
         </button>
 
-        <p id="status"></p>
-
-    <script>
-    document.getElementById("status").textContent = "HTML funcionando! ✅";
-</script>
+    </div>
 
     <script type="module" src="app.js"></script>
 
-<
+</body>
+</html>
