@@ -36,9 +36,7 @@ const db = getFirestore(app);
 
 // 🔘 BOTÃO ACESSAR
 
-const botao = document.getElementById("participar");
-
-const status = document.getElementById("status");
+const botao = document.getElementById("acessar");
 
 
 // Quando clicar no botão
@@ -51,18 +49,17 @@ botao.addEventListener("click", async () => {
 
         if (localStorage.getItem("linkpush_cadastrado") === "sim") {
 
-            status.textContent = "Você já está cadastrado! ✅";
+            alert("Você já está cadastrado! ✅");
 
             return;
         }
 
 
-        // 🔔 Verifica suporte a notificações
+        // 🔔 Verifica se o navegador suporta notificações
 
         if (!("Notification" in window)) {
 
-            status.textContent =
-                "Seu navegador não suporta notificações.";
+            alert("Seu navegador não suporta notificações.");
 
             return;
         }
@@ -70,14 +67,12 @@ botao.addEventListener("click", async () => {
 
         // 🔔 Solicita permissão
 
-        const permissao =
-            await Notification.requestPermission();
+        const permissao = await Notification.requestPermission();
 
 
         if (permissao !== "granted") {
 
-            status.textContent =
-                "Permissão para notificações não concedida.";
+            alert("Permissão para notificações não concedida.");
 
             return;
         }
@@ -87,14 +82,13 @@ botao.addEventListener("click", async () => {
 
         if (!("serviceWorker" in navigator)) {
 
-            status.textContent =
-                "Seu navegador não suporta Service Worker.";
+            alert("Seu navegador não suporta Service Worker.");
 
             return;
         }
 
 
-        // 📡 Registra o Service Worker
+        // 📡 Registra o Service Worker do Firebase
 
         const registro =
             await navigator.serviceWorker.register(
@@ -104,16 +98,16 @@ botao.addEventListener("click", async () => {
 
         // 🔥 Pega o token FCM
 
-        const token =
-            await getToken(messaging, {
-                serviceWorkerRegistration: registro
-            });
+        const token = await getToken(messaging, {
+
+            serviceWorkerRegistration: registro
+
+        });
 
 
         if (!token) {
 
-            status.textContent =
-                "Não foi possível obter o token.";
+            alert("Não foi possível obter o token de notificações.");
 
             return;
         }
@@ -122,7 +116,7 @@ botao.addEventListener("click", async () => {
         console.log("FCM Token:", token);
 
 
-        // 💾 Salva no Firestore
+        // 💾 Salva o usuário no Firestore
 
         await setDoc(
             doc(db, "usuarios", token),
@@ -134,7 +128,7 @@ botao.addEventListener("click", async () => {
         );
 
 
-        // ✅ Marca o aparelho como cadastrado
+        // ✅ Marca como cadastrado neste aparelho
 
         localStorage.setItem(
             "linkpush_cadastrado",
@@ -144,8 +138,7 @@ botao.addEventListener("click", async () => {
 
         // 🎉 Finalizado
 
-        status.textContent =
-            "Cadastro concluído! 🔥✅";
+        alert("Cadastro concluído! 🔥✅");
 
 
     } catch (erro) {
@@ -155,8 +148,9 @@ botao.addEventListener("click", async () => {
             erro
         );
 
-        status.textContent =
-            "Erro ao realizar o cadastro ❌";
+        alert(
+            "Erro ao realizar o cadastro. Veja o console."
+        );
 
     }
 
