@@ -1,24 +1,19 @@
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    query,
-    where,
-    getDocs,
-    updateDoc,
-    doc
-} from
-"https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
     getMessaging,
     getToken
-} from
-"https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
 
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
+// 🔥 CONFIGURAÇÃO DO FIREBASE
 
 const firebaseConfig = {
     apiKey: "AIzaSyBxt1S0Rn63tymkSa0CqqpQBi8fFgSKhoE",
@@ -30,205 +25,133 @@ const firebaseConfig = {
 };
 
 
-const VAPID_KEY =
-"BJnO93rvUsdi05nwRn0p2FPSSBtg3tyn4VAEnbDPb0zj_8XbDZlZ3BliGPZ4LNpWbAYeGQPeXiCdnK_uYEO2RU0";
+// 🔥 INICIA FIREBASE
+
+const app = initializeApp(firebaseConfig);
+
+const messaging = getMessaging(app);
+
+const db = getFirestore(app);
 
 
-const app =
-    initializeApp(firebaseConfig);
+// 🔘 BOTÃO ACESSAR
 
-const db =
-    getFirestore(app);
-
-const messaging =
-    getMessaging(app);
+const botao = document.getElementById("acessar");
 
 
-const botao =
-    document.getElementById("participar");
+// Quando clicar no botão
 
-const status =
-    document.getElementById("status");
+botao.addEventListener("click", async () => {
 
+    try {
 
-const idDispositivo =
-    localStorage.getItem("idDispositivo") ||
-    crypto.randomUUID();
+        // Verifica se já está cadastrado
 
+        if (localStorage.getItem("linkpush_cadastrado") === "sim") {
 
-localStorage.setItem(
-    "idDispositivo",
-    idDispositivo
-);
+            alert("Você já está cadastrado! ✅");
+
+            return;
+        }
 
 
-botao.addEventListener(
-    "click",
-    async () => {
+        // 🔔 Verifica se o navegador suporta notificações
 
-        try {
+        if (!("Notification" in window)) {
 
-            status.textContent =
-                "Solicitando permissão...";
+            alert("Seu navegador não suporta notificações.");
 
-
-            /*
-             * 1 — PEDIR PERMISSÃO
-             */
-
-            const permissao =
-                await Notification.requestPermission();
+            return;
+        }
 
 
-            if (permissao !== "granted") {
+        // 🔔 Solicita permissão
 
-                status.textContent =
-                    "Notificações não autorizadas ❌";
-
-                return;
-            }
+        const permissao = await Notification.requestPermission();
 
 
-            /*
-             * 2 — REGISTRAR SERVICE WORKER
-             */
+        if (permissao !== "granted") {
 
-            const registro =
-                await navigator.serviceWorker.register(
-                    "/LinkPush157/firebase-messaging-sw.js"
-                );
+            alert("Permissão para notificações não concedida.");
+
+            return;
+        }
 
 
-            /*
-             * 3 — OBTER TOKEN FCM
-             */
+        // ⚙️ Verifica Service Worker
 
-            status.textContent =
-                "Ativando notificações...";
+        if (!("serviceWorker" in navigator)) {
 
+            alert("Seu navegador não suporta Service Worker.");
 
-            const token =
-                await getToken(
-                    messaging,
-                    {
-                        vapidKey: VAPID_KEY,
-                        serviceWorkerRegistration:
-                            registro
-                    }
-                );
+            return;
+        }
 
 
-            if (!token) {
+        // 📡 Registra o Service Worker do Firebase
 
-                status.textContent =
-                    "Não foi possível obter o token ❌";
-
-                return;
-            }
-
-
-            /*
-             * 4 — PROCURAR USUÁRIO
-             */
-
-            status.textContent =
-                "Salvando cadastro...";
-
-
-            const usuariosRef =
-                collection(
-                    db,
-                    "usuarios"
-                );
-
-
-            const consulta =
-                query(
-                    usuariosRef,
-                    where(
-                        "idDispositivo",
-                        "==",
-                        idDispositivo
-                    )
-                );
-
-
-            const resultado =
-                await getDocs(
-                    consulta
-                );
-
-
-            /*
-             * 5 — SE JÁ EXISTE
-             */
-
-            if (!resultado.empty) {
-
-                const documento =
-                    resultado.docs[0];
-
-
-                await updateDoc(
-                    doc(
-                        db,
-                        "usuarios",
-                        documento.id
-                    ),
-                    {
-                        fcmToken: token,
-                        notificacoes: true
-                    }
-                );
-
-
-                status.textContent =
-                    "Você já está cadastrado! 🔔✅";
-
-                return;
-            }
-
-
-            /*
-             * 6 — NOVO CADASTRO
-             */
-
-            await addDoc(
-                usuariosRef,
-                {
-
-                    nome:
-                        "Usuário",
-
-                    idDispositivo:
-                        idDispositivo,
-
-                    fcmToken:
-                        token,
-
-                    notificacoes:
-                        true,
-
-                    dataCadastro:
-                        new Date().toISOString()
-
-                }
+        const registro =
+            await navigator.serviceWorker.register(
+                "./firebase-messaging-sw.js"
             );
 
 
-            status.textContent =
-                "Cadastro concluído! 🔔✅";
+        // 🔥 Pega o token FCM
+
+        const token = await getToken(messaging, {
+
+            serviceWorkerRegistration: registro
+
+        });
 
 
-        } catch (erro) {
+        if (!token) {
 
-            console.error(erro);
+            alert("Não foi possível obter o token de notificações.");
 
-            status.textContent =
-                "ERRO: " +
-                erro.message;
-
+            return;
         }
 
+
+        console.log("FCM Token:", token);
+
+
+        // 💾 Salva o usuário no Firestore
+
+        await setDoc(
+            doc(db, "usuarios", token),
+            {
+                token: token,
+                nome: "Usuário",
+                criadoEm: serverTimestamp()
+            }
+        );
+
+
+        // ✅ Marca como cadastrado neste aparelho
+
+        localStorage.setItem(
+            "linkpush_cadastrado",
+            "sim"
+        );
+
+
+        // 🎉 Finalizado
+
+        alert("Cadastro concluído! 🔥✅");
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro no cadastro:",
+            erro
+        );
+
+        alert(
+            "Erro ao realizar o cadastro. Veja o console."
+        );
+
     }
-);
+
+});
