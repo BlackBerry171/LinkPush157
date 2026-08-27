@@ -100,9 +100,11 @@ botao.addEventListener("click", async () => {
 
         const token = await getToken(messaging, {
 
-            serviceWorkerRegistration: registro
+    vapidKey: "BJnO93rvUsdi05nwRn0p2FPSSBtg3tyn4VAEnbDPb0zj_8XbDZlZ3BliGPZ4LNpWbAYeGQPeXiCdnK_uYEO2RU0",
 
-        });
+    serviceWorkerRegistration: registro
+
+});
 
 
         if (!token) {
