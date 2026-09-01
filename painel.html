@@ -4,14 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>LinkPush — Painel</title>
-
     <style>
         * {
             box-sizing: border-box;
         }
-
         body {
             margin: 0;
             padding: 25px 18px;
@@ -19,64 +16,96 @@
             background: #111;
             color: white;
         }
-
         .topo {
             margin-bottom: 25px;
         }
-
         .topo h1 {
             margin: 0;
             font-size: 30px;
         }
-
         .topo p {
             color: #aaa;
             margin-top: 8px;
         }
-
         .card {
             background: #1c1c1c;
             border-radius: 18px;
             padding: 20px;
             margin-bottom: 18px;
         }
-
         .numero {
             font-size: 36px;
             font-weight: bold;
             color: #ffd000;
         }
-
         .titulo {
             font-size: 17px;
             color: #ccc;
+            margin-bottom: 12px;
         }
-
         #usuarios {
             margin-top: 15px;
         }
-
         .usuario {
             background: #292929;
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 10px;
         }
-
         .usuario strong {
             font-size: 16px;
         }
-
         .usuario small {
             display: block;
             margin-top: 5px;
             color: #999;
         }
-
         #status {
             color: #aaa;
             text-align: center;
             margin-top: 20px;
+        }
+
+        /* Estilos do formulário de envio */
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: #292929;
+            color: white;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+        input[type="text"]::placeholder {
+            color: #777;
+        }
+        #btnEnviar {
+            width: 100%;
+            padding: 16px;
+            background: #ffd000;
+            color: #111;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 17px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        #btnEnviar:active {
+            transform: scale(0.97);
+        }
+        #statusEnvio {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .sucesso {
+            color: #70c98b !important;
+        }
+        .erro {
+            color: #ff6b6b !important;
         }
     </style>
 </head>
@@ -88,188 +117,128 @@
         <p>Painel de controle</p>
     </div>
 
+    <!-- CARD: ENVIO MANUAL -->
     <div class="card">
-        <div class="titulo">
-            👥 Usuários cadastrados
-        </div>
+        <div class="titulo">📨 Enviar Notificação Agora (Manual)</div>
+        <input type="text" id="msgTexto" placeholder="🗯 Digite a mensagem (ex: Olá, confira a novidade!)">
+        <input type="text" id="msgLink" placeholder="📎 Digite o link (ex: https://meusite.com/pagina)">
+        <button id="btnEnviar">🚀 ENVIAR PARA TODOS AGORA</button>
+        <div id="statusEnvio"></div>
+    </div>
 
-        <div class="numero" id="total">
-            0
-        </div>
+    <!-- CARD: USUÁRIOS -->
+    <div class="card">
+        <div class="titulo">👥 Usuários cadastrados</div>
+        <div class="numero" id="total">0</div>
     </div>
 
     <div class="card">
-        <div class="titulo">
-            Lista de usuários
-        </div>
-
-        <div id="usuarios">
-            Carregando...
-        </div>
+        <div class="titulo">Lista de usuários</div>
+        <div id="usuarios">Carregando...</div>
     </div>
 
     <div id="status"></div>
 
-
     <script type="module">
-
-        import { initializeApp }
-        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import {
             getFirestore,
             collection,
             onSnapshot
-        }
-        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
+        } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
-
-            apiKey:
-                "AIzaSyBxt1S0Rn63tymkSa0CqqpQBi8fFgSKhoE",
-
-            authDomain:
-                "linkpush-e7bb6.firebaseapp.com",
-
-            projectId:
-                "linkpush-e7bb6",
-
-            storageBucket:
-                "linkpush-e7bb6.firebasestorage.app",
-
-            messagingSenderId:
-                "753138864517",
-
-            appId:
-                "1:753138864517:web:3df918ac7b3a861bdff4ec"
+            apiKey: "AIzaSyBxt1S0Rn63tymkSa0CqqpQBi8fFgSKhoE",
+            authDomain: "linkpush-e7bb6.firebaseapp.com",
+            projectId: "linkpush-e7bb6",
+            storageBucket: "linkpush-e7bb6.firebasestorage.app",
+            messagingSenderId: "753138864517",
+            appId: "1:753138864517:web:3df918ac7b3a861bdff4ec"
         };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        // 🔥 Inicializa Firebase
-
-        const app =
-            initializeApp(firebaseConfig);
-
-
-        const db =
-            getFirestore(app);
-
-
-        // 📊 Elementos do painel
-
-        const lista =
-            document.getElementById("usuarios");
-
-        const total =
-            document.getElementById("total");
-
-        const status =
-            document.getElementById("status");
-
+        const lista = document.getElementById("usuarios");
+        const total = document.getElementById("total");
+        const status = document.getElementById("status");
 
         // 👥 Carrega usuários em tempo real
-
         onSnapshot(
-
             collection(db, "usuarios"),
-
             (consulta) => {
-
-                // Número total de usuários
-
-                total.textContent =
-                    consulta.size;
-
-
-                // Limpa a lista
-
+                total.textContent = consulta.size;
                 lista.innerHTML = "";
-
-
-                // Nenhum usuário
-
                 if (consulta.empty) {
-
-                    lista.innerHTML =
-                        "<p>Nenhum usuário cadastrado.</p>";
-
-                    status.textContent =
-                        "Firebase conectado ✅";
-
+                    lista.innerHTML = "<p>Nenhum usuário cadastrado.</p>";
+                    status.textContent = "Firebase conectado ✅";
                     return;
                 }
-
-
-                // Lista os usuários
-
                 let numero = 1;
-
-
                 consulta.forEach((documento) => {
-
-                    const dados =
-                        documento.data();
-
-
-                    const nome =
-                        dados.nome || "Usuário";
-
-
-                    const div =
-                        document.createElement("div");
-
-
-                    div.className =
-                        "usuario";
-
-
+                    const dados = documento.data();
+                    const nome = dados.nome || "Usuário";
+                    const div = document.createElement("div");
+                    div.className = "usuario";
                     div.innerHTML = `
-                        <strong>
-                            ${String(numero).padStart(3, "0")} — ${nome}
-                        </strong>
-
-                        <small>
-                            ID: ${documento.id}
-                        </small>
+                        <strong>${String(numero).padStart(3, "0")} — ${nome}</strong>
+                        <small>ID: ${documento.id}</small>
                     `;
-
-
                     lista.appendChild(div);
-
-
                     numero++;
-
                 });
-
-
-                status.textContent =
-                    "Firebase conectado ✅";
-
+                status.textContent = "Firebase conectado ✅";
             },
-
-
             (erro) => {
-
-                console.error(
-                    "Erro Firebase:",
-                    erro
-                );
-
-
-                status.textContent =
-                    "Erro ao carregar usuários ❌";
-
-
-                lista.innerHTML =
-                    "<p>Não foi possível carregar os usuários.</p>";
-
+                console.error("Erro Firebase:", erro);
+                status.textContent = "Erro ao carregar usuários ❌";
+                lista.innerHTML = "<p>Não foi possível carregar os usuários.</p>";
             }
-
         );
 
-    </script>
+        // 📨 BOTÃO ENVIAR NOTIFICAÇÃO
+        const btnEnviar = document.getElementById("btnEnviar");
+        const statusEnvio = document.getElementById("statusEnvio");
+        const msgTexto = document.getElementById("msgTexto");
+        const msgLink = document.getElementById("msgLink");
 
+        btnEnviar.addEventListener("click", async () => {
+            const mensagem = msgTexto.value.trim() || "Clique para ver a novidade!";
+            const link = msgLink.value.trim() || "https://blackberry171.github.io/LinkPush157/";
+
+            statusEnvio.className = "";
+            statusEnvio.textContent = "⏳ Enviando notificações...";
+            btnEnviar.disabled = true;
+            btnEnviar.style.opacity = 0.6;
+
+            try {
+                // 🔥 URL da sua função (substitua pelo seu projeto se mudar)
+                const url = "https://us-central1-linkpush-e7bb6.cloudfunctions.net/enviarAgora";
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mensagem, link })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusEnvio.className = "sucesso";
+                    statusEnvio.textContent = `✅ Enviado! Sucesso: ${data.successCount} dispositivos | Falhas: ${data.failureCount}`;
+                } else {
+                    statusEnvio.className = "erro";
+                    statusEnvio.textContent = `❌ Erro: ${data.message || data.error}`;
+                }
+            } catch (erro) {
+                statusEnvio.className = "erro";
+                statusEnvio.textContent = `❌ Erro de rede: ${erro.message}`;
+            }
+
+            btnEnviar.disabled = false;
+            btnEnviar.style.opacity = 1;
+        });
+    </script>
 </body>
 
 </html>
