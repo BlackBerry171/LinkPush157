@@ -41,7 +41,7 @@
         <p>Painel de controle</p>
     </div>
 
-    <!-- CARD: ENVIO MANUAL (SEM BLAZE) -->
+    <!-- CARD: ENVIO MANUAL -->
     <div class="card">
         <div class="titulo">📨 Enviar Notificação Agora (Manual - Direto)</div>
         
@@ -67,6 +67,9 @@
     <div id="status"></div>
 
     <script type="module">
+        // ============================================================
+        // 1. IMPORTAÇÕES E CONFIGURAÇÃO (É ISSO QUE ESTAVA FALTANDO!)
+        // ============================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
@@ -82,20 +85,21 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Variáveis globais
+        // ============================================================
+        // 2. LISTA DE USUÁRIOS EM TEMPO REAL (O CONTADOR)
+        // ============================================================
         let tokensList = [];
 
         const lista = document.getElementById("usuarios");
         const total = document.getElementById("total");
         const status = document.getElementById("status");
 
-        // 👥 Carrega usuários em tempo real e guarda os tokens
         onSnapshot(
             collection(db, "usuarios"),
             (consulta) => {
                 total.textContent = consulta.size;
                 lista.innerHTML = "";
-                tokensList = []; // Limpa a lista de tokens
+                tokensList = [];
 
                 if (consulta.empty) {
                     lista.innerHTML = "<p>Nenhum usuário cadastrado.</p>";
@@ -107,9 +111,8 @@
                 consulta.forEach((documento) => {
                     const dados = documento.data();
                     const nome = dados.nome || "Usuário";
-                    const token = documento.id; // O ID do documento É o token
+                    const token = documento.id;
                     
-                    // Adiciona o token na lista global
                     if (token) tokensList.push(token);
 
                     const div = document.createElement("div");
@@ -130,63 +133,65 @@
             }
         );
 
-        // 📨 BOTÃO ENVIAR USANDO A API LEGACY DO FCM (NÃO PRECISA DE BLAZE)
+        // ============================================================
+        // 3. BOTÃO ENVIAR (COM PROXY PARA EVITAR CORS)
+        // ============================================================
         const btnEnviar = document.getElementById("btnEnviar");
         const statusEnvio = document.getElementById("statusEnvio");
         const msgTexto = document.getElementById("msgTexto");
         const msgLink = document.getElementById("msgLink");
         const serverKeyInput = document.getElementById("serverKey");
 
-      btnEnviar.addEventListener("click", async () => {
-    const serverKey = serverKeyInput.value.trim();
-    if (!serverKey) {
-        statusEnvio.className = "erro";
-        statusEnvio.textContent = "❌ Cole a SERVER KEY no campo acima!";
-        return;
-    }
-    if (tokensList.length === 0) {
-        statusEnvio.className = "erro";
-        statusEnvio.textContent = "❌ Nenhum usuário cadastrado para enviar.";
-        return;
-    }
+        btnEnviar.addEventListener("click", async () => {
+            const serverKey = serverKeyInput.value.trim();
+            if (!serverKey) {
+                statusEnvio.className = "erro";
+                statusEnvio.textContent = "❌ Cole a SERVER KEY no campo acima!";
+                return;
+            }
+            if (tokensList.length === 0) {
+                statusEnvio.className = "erro";
+                statusEnvio.textContent = "❌ Nenhum usuário cadastrado para enviar.";
+                return;
+            }
 
-    const mensagem = msgTexto.value.trim() || "Clique para ver a novidade!";
-    const link = msgLink.value.trim() || "https://blackberry171.github.io/LinkPush157/";
+            const mensagem = msgTexto.value.trim() || "Clique para ver a novidade!";
+            const link = msgLink.value.trim() || "https://blackberry171.github.io/LinkPush157/";
 
-    statusEnvio.className = "";
-    statusEnvio.textContent = `⏳ Enviando para ${tokensList.length} dispositivos...`;
-    btnEnviar.disabled = true;
-    btnEnviar.style.opacity = 0.6;
+            statusEnvio.className = "";
+            statusEnvio.textContent = `⏳ Enviando para ${tokensList.length} dispositivos...`;
+            btnEnviar.disabled = true;
+            btnEnviar.style.opacity = 0.6;
 
-    try {
-        // 🌐 COLE A SUA URL DO WEB PREVIEW AQUI (com /send no final)
-        const proxyURL = 'https://8080-cs-e76b7763-1c5b-47a5-9a89-0a7c250780ed.cs-us-east1-pkhd.cloudshell.dev/?authuser=9/send';
+            try {
+                // ⚡⚡⚡ MUDE APENAS A LINHA ABAIXO ⚡⚡⚡
+                // Cole a URL do Web Preview (porta 8080) e acrescente /send no final
+                const proxyURL = 'https://8080-cs-e76b7763-1c5b-47a5-9a89-0a7c250780ed.cs-us-east1-pkhd.cloudshell.dev/?authuser=9/send'; 
 
-        const response = await fetch(proxyURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ serverKey, tokens: tokensList, mensagem, link })
-        });
+                const response = await fetch(proxyURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serverKey, tokens: tokensList, mensagem, link })
+                });
 
-        const data = await response.json();
+                const data = await response.json();
 
-        if (data.success || data.failure === 0) {
-            statusEnvio.className = "sucesso";
-            statusEnvio.textContent = `✅ Sucesso! Enviado para ${data.success} dispositivos.`;
-        } else {
-            statusEnvio.className = "erro";
-            statusEnvio.textContent = `❌ Erro: ${data.error || data.results?.[0]?.error || 'Falha no envio'}`;
-        }
-        console.log('Resposta do proxy:', data);
+                if (data.success || data.failure === 0) {
+                    statusEnvio.className = "sucesso";
+                    statusEnvio.textContent = `✅ Sucesso! Enviado para ${data.success} dispositivos.`;
+                } else {
+                    statusEnvio.className = "erro";
+                    statusEnvio.textContent = `❌ Erro: ${data.error || data.results?.[0]?.error || 'Falha no envio'}`;
+                }
+                console.log('Resposta do proxy:', data);
 
-    } catch (erro) {
-        statusEnvio.className = "erro";
-        statusEnvio.textContent = `❌ Erro de rede: ${erro.message}`;
-    }
+            } catch (erro) {
+                statusEnvio.className = "erro";
+                statusEnvio.textContent = `❌ Erro de rede: ${erro.message}`;
+            }
 
-    btnEnviar.disabled = false;
-    btnEnviar.style.opacity = 1;
-});
+            btnEnviar.disabled = false;
+            btnEnviar.style.opacity = 1;
         });
     </script>
 </body>
