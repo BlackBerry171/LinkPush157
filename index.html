@@ -98,7 +98,19 @@
 
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "86f35d1d-9371-496b-ac30-f4310a09a01a",  // ← COLE O APP ID AQUI
+      allowLocalhostAsSecureOrigin: true,
+    });
+    document.getElementById("acessar").addEventListener("click", function() {
+      OneSignal.Notifications.requestPermission();
+    });
+  });
+</script>
 
 </body>
 </html>
