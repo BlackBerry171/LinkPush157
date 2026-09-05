@@ -132,186 +132,19 @@
   </div>
 
 
-  <!-- 🔥 LÓGICA DO SITE 4 -->
-
-  <script type="module">
-
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-
-    import {
-      getMessaging,
-      getToken
-    }
-      from "https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
-
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      serverTimestamp
-    }
-      from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
-
-    // 🔥 MESMO FIREBASE DO LINKPUSH
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBxt1S0Rn63tymkSa0CqqpQBi8fFgSKhoE",
-      authDomain: "linkpush-e7bb6.firebaseapp.com",
-      projectId: "linkpush-e7bb6",
-      storageBucket: "linkpush-e7bb6.firebasestorage.app",
-      messagingSenderId: "753138864517",
-      appId: "1:753138864517:web:3df918ac7b3a861bdff4ec"
-    };
-
-
-    // 🔥 INICIA O FIREBASE DO SITE 4
-    // Nome separado para não entrar em conflito
-    // com o app.js do Site 2.
-
-    const appSite4 =
-      initializeApp(firebaseConfig, "Site4");
-
-    const messaging =
-      getMessaging(appSite4);
-
-    const db =
-      getFirestore(appSite4);
-
-
-    // 🔘 ELEMENTOS
-
-    const botao =
-      document.getElementById("participar");
-
-    const status =
-      document.getElementById("status");
-
-
-    // 🔘 BOTÃO ACESSAR
-
-    botao.addEventListener("click", async () => {
-
-      try {
-
-        status.textContent =
-          "Preparando cadastro...";
-
-
-        // 🔔 VERIFICA NOTIFICAÇÕES
-
-        if (!("Notification" in window)) {
-
-          status.textContent =
-            "Seu navegador não suporta notificações.";
-
-          return;
-        }
-
-
-        // 🔔 PEDE PERMISSÃO
-
-        const permissao =
-          await Notification.requestPermission();
-
-
-        if (permissao !== "granted") {
-
-          status.textContent =
-            "Permissão para notificações não concedida.";
-
-          return;
-        }
-
-
-        // ⚙️ VERIFICA SERVICE WORKER
-
-        if (!("serviceWorker" in navigator)) {
-
-          status.textContent =
-            "Seu navegador não suporta Service Worker.";
-
-          return;
-        }
-
-
-        // 📡 REGISTRA O SERVICE WORKER
-
-        const registro =
-          await navigator.serviceWorker.register(
-            "./firebase-messaging-sw.js"
-          );
-
-
-        // 🔥 PEGA TOKEN FCM
-
-        const token =
-          await getToken(messaging, {
-            serviceWorkerRegistration: registro
-          });
-
-
-        if (!token) {
-
-          status.textContent =
-            "Não foi possível obter o token.";
-
-          return;
-        }
-
-
-        console.log(
-          "FCM Token Site 4:",
-          token
-        );
-
-
-        // 💾 SALVA NO MESMO FIRESTORE
-
-        await setDoc(
-          doc(db, "usuarios", token),
-          {
-            token: token,
-            nome: "Usuário",
-            site: "Vazados",
-            criadoEm: serverTimestamp()
-          },
-          {
-            merge: true
-          }
-        );
-
-
-        // 💾 MARCA COMO CADASTRADO
-
-        localStorage.setItem(
-          "linkpush_cadastrado",
-          "sim"
-        );
-
-
-        // ✅ FINALIZADO
-
-        status.textContent =
-          "Cadastro concluído! 🔥✅";
-
-
-      } catch (erro) {
-
-        console.error(
-          "Erro no cadastro do Site 4:",
-          erro
-        );
-
-        status.textContent =
-          "Erro ao realizar o cadastro ❌";
-
-      }
-
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "86f35d1d-9371-496b-ac30-f4310a09a01a", // ← COLE O APP ID AQUI
+      allowLocalhostAsSecureOrigin: true,
     });
-
-  </script>
+    document.getElementById("participar").addEventListener("click", function() {
+      OneSignal.Notifications.requestPermission();
+    });
+  });
+</script>
 
 </body>
 
